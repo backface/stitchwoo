@@ -1,11 +1,12 @@
 <?php
 
 //error_reporting(E_ALL);
-//var_dump($_SERVER);
-// print_r($_POST);
+//print_r($_POST);
 
+// config
 $DEST_DIR = "wp-content/uploads/patterns/";
 
+// get post variables
 $is_public = $_POST["public"];
 $projectname = $_POST["projectname"];
 $filename = $_POST["filename"];
@@ -16,27 +17,27 @@ $fn = uniqid();
 $dest_file = $DEST_DIR . $fn . ".dst";
 $png_file = $DEST_DIR . $fn . ".png";
 
-// private or public category
+// set private or public category
 if ($is_public) {
 	$term_id = 23;
 } else {
 	$term_id = 22;
 }
 
-// create image
+// create an image
 $ret = move_uploaded_file($files['tmp_name'], $dest_file);
 if (!$ret) die("error uploading");
 exec("stitchconv.py -i $dest_file -o $png_file");
 
-//now get into wordpress
 
+//now get into wordpress
 define('WP_USE_THEMES', true);
 require_once( dirname(__FILE__) . '/wp-load.php' );
 // Set up the WordPress query.
 wp();
 
 	
-// add product	
+// add the product	
 $post_id = wp_insert_post( array(
     'post_title' => $projectname,
     'post_content' => 'Embroidery pattern\n'
@@ -72,23 +73,17 @@ update_post_meta( $post_id, '_backorders', 'no' );
 update_post_meta( $post_id, '_stock', '' );
 
 
-// add to category
+// add to category/ies
 //$term_ids = [ 10, 12, 18 ];
 //wp_set_object_terms( $product_id, $term_ids, 'product_cat' );
-
-
 wp_set_object_terms( $post_id, $term_id, 'product_cat' );
 
 
 // create attachments
 
-// only need these if performing outside of admin environment
 require_once(ABSPATH . 'wp-admin/includes/media.php');
 require_once(ABSPATH . 'wp-admin/includes/file.php');
 require_once(ABSPATH . 'wp-admin/includes/image.php');
-
-            
-
 
 $uploadDir = $DEST_DIR;
 $siteurl = get_option('siteurl');
@@ -126,66 +121,33 @@ $files[md5( $file_url )] = array(
 // Updating database with the new array
 update_post_meta( $post_id, '_downloadable_files', $files );
 
-/*
-
-$wp_filetype = wp_check_filetype($preview_file, null);
-$attachment = array(
-			'post_author' => 1, 
-			'post_date' => current_time('mysql'),
-			'post_date_gmt' => current_time('mysql'),
-			'post_mime_type' => $wp_filetype['type'],
-			'post_title' => $preview_file,
-			'comment_status' => 'closed',
-			'ping_status' => 'closed',
-			'post_content' => '',
-			'post_status' => 'inherit',
-			'post_modified' => current_time('mysql'),
-			'post_modified_gmt' => current_time('mysql'),
-			'post_parent' => $post_id,
-			'post_type' => 'attachment',
-			'guid' => $siteurl.'/'.$uploadDir.$name.'.png',
-);
-print_r($attachment);
-$attach_id = wp_insert_attachment( $attachment, $preview_file, $post_id );
-$attach_data = wp_generate_attachment_metadata( $attach_id, $preview_file );
-wp_update_attachment_metadata( $attach_id,  $attach_data );
-
-
-print_r($attch_data);
-
-add_post_meta($post_id, '_thumbnail_id', $attach_id);
-set_post_thumbnail($post_id, $attachment['guid']);
-*/	
-
-//use media_handle_sideload to upload img:
-
-$image = $siteurl."/wp-content/uploads/".$preview_file;
 $image = $siteurl."/wp-content/uploads/".$preview_file;
 
 // Download file to temp location
 $tmp = download_url( $image );
 
 $file_array = array();
+// Set variables for storage
+// fix file filename for query strings
+preg_match('/[^\?]+\.(jpg|jpe|jpeg|gif|png)/i', $image, $matches);
+$file_array['name'] = basename($matches[0]);
+$file_array['tmp_name'] = $tmp;
 
-	// Set variables for storage
-	// fix file filename for query strings
-	preg_match('/[^\?]+\.(jpg|jpe|jpeg|gif|png)/i', $image, $matches);
-	$file_array['name'] = basename($matches[0]);
-	$file_array['tmp_name'] = $tmp;
+// If error storing temporarily, unlink
+if ( is_wp_error( $tmp ) ) {
+	@unlink($file_array['tmp_name']);
+	$file_array['tmp_name'] = '';
 
-	// If error storing temporarily, unlink
-	if ( is_wp_error( $tmp ) ) {
-		@unlink($file_array['tmp_name']);
-		$file_array['tmp_name'] = '';
+}
 
-	}
-//print_r($file_array);
 $thumbid = media_handle_sideload( $file_array, $post_id, $project_name );
 set_post_thumbnail(post_id, $thumbid);
 add_post_meta($post_id, '_thumbnail_id', $thumbid);
 
 $post = get_post($post_id);
 
+
+// Finally return header and json data
 
 header('Access-Control-Allow-Origin: *');
 header('Content-type: application/json');
@@ -197,6 +159,5 @@ $response = array(
 );
 
 echo json_encode($response); 
-
 
 ?>
