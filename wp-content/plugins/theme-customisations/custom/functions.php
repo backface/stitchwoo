@@ -18,6 +18,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_output_related_products', 20 );
 
+function remove_from_homepage() {
+	remove_action( 'homepage', 'storefront_recent_products',       30 );
+	remove_action( 'homepage', 'storefront_popular_products',      50 );
+	remove_action( 'homepage', 'storefront_on_sale_products',      60 );
+	remove_action( 'homepage', 'storefront_best_selling_products', 70 );
+}
+add_action("init","remove_from_homepage");
+
 function custom_pre_get_posts_query( $q ) {
 
     $tax_query = (array) $q->get( 'tax_query' );
