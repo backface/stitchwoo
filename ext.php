@@ -9,7 +9,7 @@ $PRICE_PER_1K_STITCHES = 1.5;
 
 
 // get post variables
-$is_public = $_POST["public"];
+$is_public = $_POST["public"] == "true";
 $projectname = $_POST["projectname"];
 $filename = $_POST["filename"];
 

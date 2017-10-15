@@ -34,7 +34,7 @@ function custom_pre_get_posts_query( $q ) {
            'taxonomy' => 'product_cat',
            'field' => 'slug',
            'terms' => array( 'customized-items','private-patterns', 'carrier'), 
-			// Don't display products in these categories on shop pate
+			// Don't display products in these categories on shop page
            'operator' => 'NOT IN'
     );
     $q->set( 'tax_query', $tax_query );
@@ -66,6 +66,6 @@ add_filter( 'storefront_best_selling_products', 'this_exclude_widget_category' )
 
 function this_exclude_widget_category( $args ) {
 	// Enter the id of the category you want to exclude in place of '30'
-	$args['exclude'] = array('22','23','28');
+
 	return $args;
 }
