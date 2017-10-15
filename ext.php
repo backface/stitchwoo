@@ -186,7 +186,7 @@ $pattern_post = get_post($post_id);
 $pattern_id = $post_id;
 
 $post_id = wp_insert_post( array(
-    'post_title' => "My costum Embroidery",
+    'post_title' => "My Costum Embroidered Product",
     'post_content' => "",
     'post_name' => uniqid(),
     'post_status' => 'publish',
@@ -264,7 +264,7 @@ $data = Array
 
             'selection_mode' => thumbnails,
             'default_id' => 0,
-            'title' => carrier,
+            'title' => 'Carrier product',
             'description' => '',
             'thumbnail_id' => '',
             'quantity_min' => 1,
@@ -354,7 +354,7 @@ header('Content-type: application/json');
 $response = array(
 	'success' => true,
 	'id'=> $post_id,
-	'url'=> get_post($post_id)->guid . "#carrier",
+	'url'=> get_post($post_id)->guid . "#carrier-product",
 );
 
 echo json_encode($response); 
