@@ -22,9 +22,9 @@ $png_file = $DEST_DIR . $fn . ".png";
 
 // set private or public category
 if ($is_public) {
-	$term_id = 23;
+	$term_id = 24;
 } else {
-	$term_id = 22;
+	$term_id = 23;
 }
 
 // read meta data
@@ -121,7 +121,8 @@ require_once(ABSPATH . 'wp-admin/includes/file.php');
 require_once(ABSPATH . 'wp-admin/includes/image.php');
 
 $uploadDir = $DEST_DIR;
-$siteurl = get_option('siteurl');
+$siteurl = str_replace("https","http", get_option('siteurl'));
+
 $pattern_file = 'patterns/'.$fn.'.dst';
 $preview_file = 'patterns/'.$fn.'.png';
 
@@ -172,12 +173,15 @@ $file_array['tmp_name'] = $tmp;
 if ( is_wp_error( $tmp ) ) {
 	@unlink($file_array['tmp_name']);
 	$file_array['tmp_name'] = '';
-
+	echo "error uploading image file";
 }
+
 
 $thumbid = media_handle_sideload( $file_array, $post_id, $project_name );
 set_post_thumbnail(post_id, $thumbid);
 add_post_meta($post_id, '_thumbnail_id', $thumbid);
+
+
 
 // finished
 
@@ -193,7 +197,7 @@ $post_id = wp_insert_post( array(
     'post_type' => "product",
 ) );
 wp_set_object_terms( $post_id, 'composite', 'product_type' );
-wp_set_object_terms( $post_id, 25, 'product_cat' );
+wp_set_object_terms( $post_id, 28, 'product_cat' );
 
 // update meta data
 update_post_meta( $post_id, '_visibility', 'hidden' );
@@ -259,7 +263,7 @@ $data = Array
             'query_type' => category_ids,
             'assigned_category_ids' => Array
                 (
-                    '0' => 24,
+                    '0' => 22,
                 ),
 
             'selection_mode' => thumbnails,
