@@ -42,8 +42,8 @@ $ret = move_uploaded_file($files['tmp_name'], $dest_file);
 if (!$ret) die("error uploading");
 exec("stitchconv.py -i $dest_file -o $png_file --show-info", $ret_array);
 
-$nr_stitches = intval(trim(split(":",$ret_array[0])[1]));
-$size = split("x",trim(split(":",$ret_array[1])[1]));
+$nr_stitches = intval(trim(explode(":",$ret_array[0])[1]));
+$size = explode("x",trim(explode(":",$ret_array[1])[1]));
 
 //now get into wordpress
 define('WP_USE_THEMES', true);
