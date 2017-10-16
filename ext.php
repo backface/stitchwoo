@@ -11,14 +11,14 @@ $PRICE_PER_1K_STITCHES = 1.5;
 // get post variables
 $is_public = $_POST["public"] == "true";
 $projectname = $_POST["projectname"];
-$filename = $_POST["filename"];
 
 // upload pattern file
-$files = $_FILES['dstfile'];
+$files_dst = $_FILES['dstfile'];
+$files_exp = $_FILES['expfile'];
 $fn = uniqid();
-$dest_file = $DEST_DIR . $fn . ".dst";
+$dst_file = $DEST_DIR . $fn . ".dst";
 $png_file = $DEST_DIR . $fn . ".png";
-
+$exp_file = $DEST_DIR . $fn . ".exp";
 
 // set private or public category
 if ($is_public) {
@@ -28,7 +28,7 @@ if ($is_public) {
 }
 
 // read meta data
-$fp = fopen($files['tmp_name'],"r");
+$fp = fopen($files_dst['tmp_name'],"r");
 $headers = fread($fp,512);
 fclose($fp);
 
@@ -38,12 +38,14 @@ $info["height"] =  (floatval(substr($headers,59,6)) - floatval(substr($headers,6
 
 
 // create an image
-$ret = move_uploaded_file($files['tmp_name'], $dest_file);
+$ret = move_uploaded_file($files_dst['tmp_name'], $dst_file);
 if (!$ret) die("error uploading");
-exec("stitchconv.py -i $dest_file -o $png_file --show-info", $ret_array);
+exec("stitchconv.py -i $dst_file -o $png_file --show-info", $ret_array);
 
 $nr_stitches = intval(trim(explode(":",$ret_array[0])[1]));
 $size = explode("x",trim(explode(":",$ret_array[1])[1]));
+
+$ret = move_uploaded_file($files_exp['tmp_name'], $exp_file);
 
 //now get into wordpress
 define('WP_USE_THEMES', true);
@@ -123,18 +125,18 @@ require_once(ABSPATH . 'wp-admin/includes/image.php');
 $uploadDir = $DEST_DIR;
 $siteurl = str_replace("https","http", get_option('siteurl'));
 
-$pattern_file = 'patterns/'.$fn.'.dst';
+$dst_file = 'patterns/'.$fn.'.dst';
+$exp_file = 'patterns/'.$fn.'.exp';
 $preview_file = 'patterns/'.$fn.'.png';
 
-
-// downloadable file attachemnt
-$wp_filetype = wp_check_filetype($pattern_file, null);
+// downloadable DST attachemnt
+$wp_filetype = wp_check_filetype($dst_file, null);
 $attachment = array(
 			'post_author' => 1, 
 			'post_date' => current_time('mysql'),
 			'post_date_gmt' => current_time('mysql'),
 			'post_mime_type' => $wp_filetype['type'],
-			'post_title' => $pattern_file,
+			'post_title' => $dst_file,
 			'comment_status' => 'closed',
 			'ping_status' => 'closed',
 			'post_content' => '',
@@ -145,12 +147,37 @@ $attachment = array(
 			'post_type' => 'attachment',
 			'guid' => $siteurl.'/'.$uploadDir.$fn.'.dst',
 );
-$attach_id = wp_insert_attachment( $attachment, $pattern_file, $post_id );
-$file_name = $project_name;
-$file_url = wp_get_attachment_url($attach_id);
-$files[md5( $file_url )] = array(
-	'name' => $file_name.'.dst',
-	'file' => $file_url
+$attach_id = wp_insert_attachment( $attachment, $dst_file, $post_id );
+$file_url1 = wp_get_attachment_url($attach_id);
+
+// downloadable EXP attachemnt
+$wp_filetype = wp_check_filetype($exp_file, null);
+$attachment = array(
+			'post_author' => 1, 
+			'post_date' => current_time('mysql'),
+			'post_date_gmt' => current_time('mysql'),
+			'post_mime_type' => $wp_filetype['type'],
+			'post_title' => $exp_file,
+			'comment_status' => 'closed',
+			'ping_status' => 'closed',
+			'post_content' => '',
+			'post_status' => 'inherit',
+			'post_modified' => current_time('mysql'),
+			'post_modified_gmt' => current_time('mysql'),
+			'post_parent' => $post_id,
+			'post_type' => 'attachment',
+			'guid' => $siteurl.'/'.$uploadDir.$fn.'.exp',
+);
+$attach_id = wp_insert_attachment( $attachment, $exp_file, $post_id );
+$file_url2 = wp_get_attachment_url($attach_id);
+
+$files[md5( $file_url1 )] = array(
+	'name' => $fn.'.dst',
+	'file' => $file_url1
+);
+$files[md5( $file_url2 )] = array(
+	'name' => $fn.'.exp',
+	'file' => $file_url2
 );
 // Updating database with the new array
 update_post_meta( $post_id, '_downloadable_files', $files );
