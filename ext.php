@@ -27,6 +27,7 @@ if ($is_public) {
 	$term_id = 23;
 }
 
+
 // read meta data
 $fp = fopen($files_dst['tmp_name'],"r");
 $headers = fread($fp,512);
@@ -83,10 +84,12 @@ $post_id = wp_insert_post( array(
 wp_set_object_terms( $post_id, 'simple', 'product_type' );
 
 // update meta data
-if ($is_public)
+if (false) // $is_public)
 	update_post_meta( $post_id, '_visibility', 'visible' );
 else
 	update_post_meta( $post_id, '_visibility', 'hidden' );
+	
+	
 update_post_meta( $post_id, '_stock_status', 'instock');
 update_post_meta( $post_id, 'total_sales', '0' );
 update_post_meta( $post_id, '_downloadable', 'yes' );

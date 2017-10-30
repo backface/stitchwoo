@@ -46,13 +46,14 @@ add_action( 'best_selling_products', 'custom_pre_get_posts_query' );
 
 add_filter( 'get_terms', 'this_exclude_category', 10, 3 );
 add_filter( 'best_selling_products', 'this_exclude_category', 10, 3 );
+
 function this_exclude_category( $terms, $taxonomies, $args ) {
   $new_terms = array();
   // if a product category and on a page
   if ( in_array( 'product_cat', $taxonomies ) && ! is_admin() && is_page() ) {
     foreach ( $terms as $key => $term ) {
 	// Enter the name of the category you want to exclude in place of 'uncategorised'
-      if ( ! in_array( $term->slug, array( 'private-patterns', 'mediums', 'carrier', 'customized-items' ) ) ) {
+      if ( ! in_array( $term->slug, array( 'private-patterns', 'mediums', 'carrier', 'customized-items','public-patterns' ) ) ) {
         $new_terms[] = $term;
       }
     }
@@ -66,6 +67,6 @@ add_filter( 'storefront_best_selling_products', 'this_exclude_widget_category' )
 
 function this_exclude_widget_category( $args ) {
 	// Enter the id of the category you want to exclude in place of '30'
-
+-	$args['exclude'] = array('22','23','28','24');
 	return $args;
 }
