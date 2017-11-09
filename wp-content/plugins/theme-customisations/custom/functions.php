@@ -33,7 +33,7 @@ function custom_pre_get_posts_query( $q ) {
     $tax_query[] = array(
            'taxonomy' => 'product_cat',
            'field' => 'slug',
-           'terms' => array( 'customized-items','private-patterns', 'carrier'), 
+           'terms' => array( 'customized-items','private-patterns', 'carrier','public-patterns'), 
 			// Don't display products in these categories on shop page
            'operator' => 'NOT IN'
     );
@@ -70,3 +70,16 @@ function this_exclude_widget_category( $args ) {
 -	$args['exclude'] = array('22','23','28','24');
 	return $args;
 }
+
+add_filter( 'woocommerce_composite_component_summary_max_columns', 'wc_cp_summary_max_columns', 10, 2 );
+function wc_cp_summary_max_columns( $cols, $composite ) {
+	$cols = 3;
+	return $cols;
+}
+
+add_filter( 'woocommerce_composite_component_loop_columns', 'wc_cp_component_loop_columns', 10, 3 );
+function wc_cp_component_loop_columns( $cols, $component_id, $composite ) {
+	$cols = 3;
+	return $cols;
+}
+
