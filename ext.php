@@ -337,11 +337,18 @@ imagealphablending($dest, false);
 imagesavealpha($dest, true);
 
 list($width, $height, $type, $attr) = getimagesize('wp-content/uploads/' . $preview_file);
-$scale = max(150.0/$width, 125.0/$height);
+$scale = 0.3;
 $new_w = $width* $scale;
 $new_h = $height* $scale;
-#print($width . "," . $new_w);
-imagecopyresized($dest, $src, 287-$new_w/2, 200-$new_h/2, 0, 0, $new_w, $new_h, $width, $height);
+
+$rgb = array(233,233,233);
+$rgb = array(255-$rgb[0],255-$rgb[1],255-$rgb[2]);
+imagefilter($src, IMG_FILTER_NEGATE); 
+imagefilter($src, IMG_FILTER_COLORIZE, $rgb[0], $rgb[1], $rgb[2]); 
+imagefilter($src, IMG_FILTER_NEGATE); 
+imagealphablending( $src, false );
+imagecopyresampled($dest, $src, 287-$new_w/2, 200-$new_h/2, 0, 0, $new_w, $new_h, $width, $height);
+
 #imagecopymerge($dest, $src, 10, 9, 0, 0, 181, 180, 100); //have to play with these numbers for it to work for you, etc.
 
 $white = imagecolorexact($dest, 255, 255, 255);
